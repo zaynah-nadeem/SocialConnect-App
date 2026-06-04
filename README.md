@@ -1,97 +1,71 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# SocialConnect
 
-# Getting Started
+A React Native social app implementing the 3-week curriculum: authentication, navigation, profiles, posts, likes/comments, Redux state, notifications, real-time sync, and animations.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Quick start
 
-## Step 1: Start Metro
-
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
+```bash
+npm install
 npm start
-
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+# In another terminal:
 npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# or
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+**Demo login:** `demo@socialconnect.app` / `demo123`
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Features by week
 
-## Step 3: Modify your app
+### Week 1
+- React Native project with ESLint & Prettier
+- **Auth:** Login, Sign Up, Forgot Password (Formik + Yup)
+- **Backend:** Mock API (AsyncStorage) by default; Firebase Auth optional
+- **Navigation:** Stack (auth + modals) + Bottom tabs (Home, Profile, Settings)
+- **Profile:** Edit name, bio, avatar (`react-native-image-picker`)
 
-Now that you have successfully run the app, let's make changes!
+### Week 2
+- **Feed:** Create text/image posts, FlatList, timestamps
+- **Likes & comments:** Animated like button, comments screen
+- **Profiles:** View other users from feed author tap
+- **State:** Redux Toolkit (auth, posts, notifications)
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Week 3
+- **Notifications:** In-app notification center (likes/comments on your posts)
+- **Real-time:** Firestore listeners when Firebase enabled; 3s polling in mock mode
+- **UI:** `react-native-reanimated` like animation, `react-native-responsive-dimensions`
+- **Polish:** Memoized post cards, session persistence, error alerts
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Firebase setup (optional)
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+1. Create a Firebase project and enable **Authentication** (Email/Password) and **Firestore**.
+2. Copy config into `src/config/firebase.ts` and set `USE_FIREBASE = true`.
+3. Create Firestore collections: `users`, `posts` (documents match types in `src/types`).
 
-## Congratulations! :tada:
+For push notifications (FCM), add native FCM setup and extend `src/services/notificationService.ts`.
 
-You've successfully run and modified your React Native App. :partying_face:
+## Project structure
 
-### Now what?
+```
+src/
+  components/     # PostCard, LikeButton, AuthTextField, ...
+  config/         # Firebase config
+  hooks/          # Typed Redux hooks
+  navigation/     # Auth stack, main tabs, root navigator
+  screens/        # Auth, main tabs, modals
+  services/       # Auth, posts, mock storage, notifications
+  store/          # Redux slices
+  theme/          # Colors
+  types/          # TypeScript models
+  utils/          # Validation schemas, responsive helpers
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## Scripts
 
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+| Command        | Description              |
+|----------------|--------------------------|
+| `npm start`    | Metro bundler            |
+| `npm run android` | Run on Android      |
+| `npm run ios`  | Run on iOS (macOS)       |
+| `npm run lint` | ESLint                   |
+| `npm test`     | Jest                     |
