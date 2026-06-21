@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
@@ -7,12 +8,15 @@ import {
   query,
   setDoc,
   updateDoc,
+} from 'firebase/firestore';
+import {
   getFirebaseDb,
   isFirebaseConfigured,
   firestoreCollections,
 } from '../config/firebase';
 import type { Comment, Post } from '../types';
 import { loadPosts, savePosts } from './mockStorage';
+import { uploadImage } from './storageService';
 
 type PostsListener = (posts: Post[]) => void;
 
@@ -54,15 +58,24 @@ export async function createPost(
   userName: string,
   userAvatarUri: string | undefined,
   text: string,
-  imageUri?: string,
+  imageUri?: string | null,
 ): Promise<Post> {
+  let uploadedImageUri = imageUri;
+  console.log('Firebase configured:', isFirebaseConfigured());
+  if (imageUri) {
+    uploadedImageUri = await uploadImage(
+      imageUri,
+      `posts/${userId}/${Date.now()}.jpg`,
+    );
+  }
+
   const post: Post = {
     id: generatePostId(),
     userId,
     userName,
     userAvatarUri,
     text: text.trim(),
-    imageUri,
+    imageUri: uploadedImageUri || null,
     likeIds: [],
     comments: [],
     createdAt: new Date().toISOString(),
@@ -79,6 +92,75 @@ export async function createPost(
   await savePosts(posts);
   notifyMockListeners(posts);
   return post;
+}
+
+export async function updatePost(
+  postId: string,
+  userId: string,
+  updates: { text?: string; imageUri?: string },
+): Promise<Post> {
+  const posts = await fetchPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) {
+    throw new Error('Post not found');
+  }
+  if (post.userId !== userId) {
+    throw new Error('You can only edit your own posts');
+  }
+
+  let imageUri = updates.imageUri ?? post.imageUri;
+  if (updates.imageUri && !updates.imageUri.startsWith('http')) {
+    imageUri = await uploadImage(
+      updates.imageUri,
+      `posts/${userId}/${Date.now()}.jpg`,
+    );
+  }
+
+  const updated: Post = {
+    ...post,
+    text: updates.text !== undefined ? updates.text.trim() : post.text,
+    imageUri,
+  };
+
+  if (isFirebaseConfigured()) {
+    const db = getFirebaseDb()!;
+    await updateDoc(doc(db, firestoreCollections.posts, postId), {
+      text: updated.text,
+      imageUri: updated.imageUri ?? null,
+    });
+    return updated;
+  }
+
+  const allPosts = await loadPosts();
+  const index = allPosts.findIndex(p => p.id === postId);
+  allPosts[index] = updated;
+  await savePosts(allPosts);
+  notifyMockListeners(allPosts);
+  return updated;
+}
+
+export async function deletePost(
+  postId: string,
+  userId: string,
+): Promise<void> {
+  const posts = await fetchPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) {
+    throw new Error('Post not found');
+  }
+  if (post.userId !== userId) {
+    throw new Error('You can only delete your own posts');
+  }
+
+  if (isFirebaseConfigured()) {
+    const db = getFirebaseDb()!;
+    await deleteDoc(doc(db, firestoreCollections.posts, postId));
+    return;
+  }
+
+  const allPosts = await loadPosts();
+  await savePosts(allPosts.filter(p => p.id !== postId));
+  notifyMockListeners(await loadPosts());
 }
 
 export async function toggleLike(
@@ -154,19 +236,42 @@ export async function addComment(
   return posts[index];
 }
 
+export async function searchPosts(searchTerm: string): Promise<Post[]> {
+  const term = searchTerm.trim().toLowerCase();
+  if (!term) {
+    return [];
+  }
+  const posts = await fetchPosts();
+  return posts.filter(
+    p =>
+      p.text.toLowerCase().includes(term) ||
+      p.userName.toLowerCase().includes(term),
+  );
+}
+
 export function subscribeToPosts(listener: PostsListener): () => void {
   if (isFirebaseConfigured()) {
     const db = getFirebaseDb()!;
     const q = query(
       collection(db, firestoreCollections.posts),
-      orderBy('createdAt', 'desc'),
+      orderBy('createdAt', 'desc')
     );
+
     return onSnapshot(q, snap => {
-      const posts = snap.docs.map(d => d.data() as Post);
+      const postsMap = new Map<string, Post>();
+
+      snap.docs.forEach(d => {
+        const post = d.data() as Post;
+        postsMap.set(post.id, post);
+      });
+
+      const posts = Array.from(postsMap.values());
+
       listener(posts);
     });
   }
 
+  // fallback mock mode
   mockListeners.add(listener);
   fetchPosts().then(listener);
 

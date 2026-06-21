@@ -8,9 +8,6 @@ export function navigateRoot<Route extends keyof RootStackParamList>(
   params?: RootStackParamList[Route],
 ): void {
   const parent = navigation.getParent();
-  if (parent?.navigate) {
-    parent.navigate(name, params);
-    return;
-  }
-  navigation.navigate(name, params);
+  const nav = parent ?? navigation;
+  (nav.navigate as (screen: string, p?: object) => void)(name, params);
 }

@@ -25,7 +25,7 @@ export const signIn = createAsyncThunk(
   'auth/signIn',
   async ({ email, password }: { email: string; password: string }) => {
     return authService.signIn(email, password);
-  }
+  },
 );
 
 export const signUp = createAsyncThunk(
@@ -40,18 +40,15 @@ export const signUp = createAsyncThunk(
     name: string;
   }) => {
     return authService.signUp(email, password, name);
-  }
+  },
 );
 
-// ✅ FIXED SIGNOUT (IMPORTANT PART)
 export const signOut = createAsyncThunk(
   'auth/signOut',
   async (_, { dispatch }) => {
     await authService.signOut();
-
-    // 🔥 force clear Redux state immediately
     dispatch(clearAuthState());
-  }
+  },
 );
 
 export const updateProfile = createAsyncThunk(
@@ -64,7 +61,7 @@ export const updateProfile = createAsyncThunk(
     updates: Partial<Pick<User, 'name' | 'bio' | 'avatarUri'>>;
   }) => {
     return authService.updateUserProfile(userId, updates);
-  }
+  },
 );
 
 const authSlice = createSlice({
@@ -74,12 +71,9 @@ const authSlice = createSlice({
     clearAuthError: state => {
       state.error = null;
     },
-
     setUser: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload;
     },
-
-    // 🔥 ADD THIS (important for logout reliability)
     clearAuthState: state => {
       state.user = null;
       state.loading = false;
@@ -87,7 +81,6 @@ const authSlice = createSlice({
       state.initialized = true;
     },
   },
-
   extraReducers: builder => {
     builder
       .addCase(initializeAuth.pending, state => {
@@ -102,7 +95,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.initialized = true;
       })
-
       .addCase(signIn.pending, state => {
         state.loading = true;
         state.error = null;
@@ -115,7 +107,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.error.message ?? 'Sign in failed';
       })
-
       .addCase(signUp.pending, state => {
         state.loading = true;
         state.error = null;
@@ -128,7 +119,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.error.message ?? 'Sign up failed';
       })
-
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.user = action.payload;
       });

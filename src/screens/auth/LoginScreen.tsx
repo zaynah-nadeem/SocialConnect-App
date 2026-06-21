@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CommonActions } from '@react-navigation/native';
 
 import AuthTextField from '../../components/AuthTextField';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -48,17 +47,7 @@ export default function LoginScreen({ navigation }: Props) {
           validationSchema={loginSchema}
           onSubmit={async values => {
             dispatch(clearAuthError());
-
-            const res = await dispatch(signIn(values));
-
-            if (res.meta.requestStatus === 'fulfilled') {
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{ name: 'Main' as never }],
-                })
-              );
-            }
+            await dispatch(signIn(values));
           }}
         >
           {({

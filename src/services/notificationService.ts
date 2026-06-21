@@ -10,7 +10,7 @@ export function createNotification(
     ...partial,
     id: `notif_${notificationId}_${Date.now()}`,
     read: false,
-    createdAt: new Date().toISOString(),
+    createdAt: Date.now(),
   };
 }
 
@@ -29,7 +29,7 @@ export function notifyLike(
     message: `${currentUserName} liked your post`,
     postId,
     fromUserId: currentUserId,
-    fromUserName: currentUserName,
+    toUserId: postOwnerId,
   });
 }
 
@@ -47,6 +47,6 @@ export function notifyComment(
     message: `${currentUserName} commented on your post`,
     postId,
     fromUserId: currentUserId,
-    fromUserName: currentUserName,
+    toUserId: postOwnerId,
   });
 }

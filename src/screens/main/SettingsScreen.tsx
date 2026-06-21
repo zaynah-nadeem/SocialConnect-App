@@ -6,14 +6,13 @@ import { signOut } from '../../store/slices/authSlice';
 import { clearNotifications } from '../../store/slices/notificationsSlice';
 import { colors } from '../../theme/colors';
 import { fontSize, spacing } from '../../utils/responsive';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { isFirebaseConfigured } from '../../config/firebase';
 
 export default function SettingsScreen() {
   const dispatch = useAppDispatch();
-  const navigation = useNavigation();
   const [realtime, setRealtime] = React.useState(true);
 
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     Alert.alert('Sign out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -22,17 +21,6 @@ export default function SettingsScreen() {
         onPress: async () => {
           await dispatch(clearNotifications());
           await dispatch(signOut());
-
-          navigation.reset({
-  index: 0,
-  routes: [{ name: 'Auth' as never }],
-});
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: 'Auth' as never }],
-            }),
-          );
         },
       },
     ]);
@@ -45,6 +33,13 @@ export default function SettingsScreen() {
       <View style={styles.row}>
         <Text style={styles.label}>Real-time sync</Text>
         <Switch value={realtime} onValueChange={setRealtime} />
+      </View>
+
+      <View style={styles.row}>
+        <Text style={styles.label}>Backend</Text>
+        <Text style={styles.value}>
+          {isFirebaseConfigured() ? 'Firebase' : 'Local (mock)'}
+        </Text>
       </View>
 
       <Text style={styles.section}>Account</Text>
@@ -69,13 +64,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: colors.surface,
     padding: spacing.md,
     borderRadius: 10,
+    marginBottom: spacing.sm,
   },
   label: { color: colors.text },
+  value: { color: colors.textSecondary, fontSize: fontSize.sm },
 });

@@ -22,6 +22,7 @@ import ProfileAvatar from '../components/ProfileAvatar';
 
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { updateProfile } from '../store/slices/authSlice';
+import { uploadImage } from '../services/storageService';
 
 import type { RootStackParamList } from '../types';
 import { colors } from '../theme/colors';
@@ -72,13 +73,21 @@ export default function EditProfileScreen({ navigation }: Props) {
           onSubmit={async values => {
             setSaving(true);
             try {
+              let uploadedAvatar = avatarUri;
+              if (avatarUri && !avatarUri.startsWith('http')) {
+                uploadedAvatar = await uploadImage(
+                  avatarUri,
+                  `avatars/${user.id}/${Date.now()}.jpg`,
+                );
+              }
+
               await dispatch(
                 updateProfile({
                   userId: user.id,
                   updates: {
                     name: values.name,
                     bio: values.bio,
-                    avatarUri,
+                    avatarUri: uploadedAvatar,
                   },
                 }),
               ).unwrap();
@@ -120,9 +129,7 @@ export default function EditProfileScreen({ navigation }: Props) {
                 onChangeText={handleChange('bio')}
                 onBlur={handleBlur('bio')}
                 error={touched.bio ? errors.bio : undefined}
-                style={[
-                  styles.bioInput,
-                ]}
+                style={styles.bioInput}
               />
 
               <PrimaryButton
@@ -143,29 +150,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-
   container: {
     padding: spacing.lg,
   },
-
   avatarWrap: {
     alignItems: 'center',
     marginBottom: spacing.lg,
   },
-
   avatar: {
     width: wp(28),
     height: wp(28),
     borderRadius: wp(14),
   },
-
   changePhoto: {
     color: colors.primary,
     marginTop: spacing.sm,
     fontWeight: '600',
   },
-
-
   bioInput: {
     color: '#FFFFFF',
     minHeight: 90,

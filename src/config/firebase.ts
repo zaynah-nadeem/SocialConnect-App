@@ -7,21 +7,28 @@ import {
   doc,
 } from 'firebase/firestore';
 import { Database, getDatabase, ref } from 'firebase/database';
+import {
+  FirebaseStorage,
+  getStorage,
+} from 'firebase/storage';
 
-/** Set to true and fill firebaseConfig after creating a Firebase project. */
-export const USE_FIREBASE = false;
+/**
+ * Set to true after replacing firebaseConfig with your project values.
+ * The app runs in mock (AsyncStorage) mode when false or placeholders remain.
+ */
+export const USE_FIREBASE = true;
 
-export const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
-  databaseURL: 'https://YOUR_PROJECT-default-rtdb.firebaseio.com',
+const firebaseConfig = {
+  apiKey: "AIzaSyDtY8feKUNVwBS1vFEM11WBTRQcmotvYsI",
+  authDomain: "socialconnect-b8c84.firebaseapp.com",
+  projectId: "socialconnect-b8c84",
+  storageBucket: "socialconnect-b8c84.firebasestorage.app",
+  messagingSenderId: "481498971346",
+  appId: "1:481498971346:web:183c1a3609c7dfe9cfc10b"
 };
 
 let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
 
 export function isFirebaseConfigured(): boolean {
   return (
@@ -43,7 +50,13 @@ export function getFirebaseApp(): FirebaseApp | null {
 
 export function getFirebaseAuth(): Auth | null {
   const firebaseApp = getFirebaseApp();
-  return firebaseApp ? getAuth(firebaseApp) : null;
+  if (!firebaseApp) {
+    return null;
+  }
+  if (!auth) {
+    auth = getAuth(firebaseApp);
+  }
+  return auth;
 }
 
 export function getFirebaseDb(): Firestore | null {
@@ -56,9 +69,17 @@ export function getFirebaseRtdb(): Database | null {
   return firebaseApp ? getDatabase(firebaseApp) : null;
 }
 
+export function getFirebaseStorage(): FirebaseStorage | null {
+  const firebaseApp = getFirebaseApp();
+  return firebaseApp ? getStorage(firebaseApp) : null;
+}
+
 export const firestoreCollections = {
   users: 'users',
   posts: 'posts',
+  follows: 'follows',
+  conversations: 'conversations',
+  messages: 'messages',
 };
 
 export { collection, doc, ref };

@@ -13,62 +13,35 @@ import {
 import { Formik } from 'formik';
 import { launchImageLibrary } from 'react-native-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-
 import PrimaryButton from '../components/PrimaryButton';
-import { useAppDispatch } from '../hooks/redux';
-import { createPost } from '../store/slices/postsSlice';
+import { useAppDispatch, useAppSelector } from '../hooks/redux';
+import { updatePost } from '../store/slices/postsSlice';
 import type { RootStackParamList } from '../types';
 import { colors } from '../theme/colors';
 import { fontSize, spacing, wp } from '../utils/responsive';
 import { postSchema } from '../utils/validationSchemas';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CreatePost'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'EditPost'>;
 
-export default function CreatePostScreen({ navigation }: Props) {
+export default function EditPostScreen({ route, navigation }: Props) {
+  const { postId } = route.params;
   const dispatch = useAppDispatch();
-
-  const [imageUri, setImageUri] = useState<string | undefined>(undefined);
+  const post = useAppSelector(s =>
+    s.posts.items.find(p => p.id === postId),
+  );
+  const [imageUri, setImageUri] = useState<string | undefined>(post?.imageUri);
   const [submitting, setSubmitting] = useState(false);
+
+  if (!post) {
+    return null;
+  }
 
   const pickImage = () => {
     launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, res => {
-      const uri = res.assets?.[0]?.uri;
-      if (uri) setImageUri(uri);
+      if (res.assets?.[0]?.uri) {
+        setImageUri(res.assets[0].uri);
+      }
     });
-  };
-
-  const handleCreatePost = async (values: { text: string }) => {
-    if (submitting) return;
-  
-    const text = values.text?.trim();
-  
-    if (!text && !imageUri) {
-      Alert.alert('Empty post', 'Add text or an image.');
-      return;
-    }
-  
-    setSubmitting(true);
-  
-    try {
-      await dispatch(
-        createPost({
-          text,
-          imageUri,
-        })
-      ).unwrap();
-  
-      setImageUri(undefined);
-      navigation.goBack();
-    } catch (e) {
-      console.log('CREATE POST ERROR:', e);
-  
-      Alert.alert(
-        'Error creating post',
-        e instanceof Error ? e.message : 'Something went wrong'
-      );
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   return (
@@ -78,20 +51,37 @@ export default function CreatePostScreen({ navigation }: Props) {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Formik
-          initialValues={{ text: '' }}
+          initialValues={{ text: post.text }}
           validationSchema={postSchema}
-          onSubmit={handleCreatePost}
+          enableReinitialize
+          onSubmit={async values => {
+            if (!values.text.trim() && !imageUri) {
+              Alert.alert('Empty post', 'Add text or an image.');
+              return;
+            }
+            setSubmitting(true);
+            try {
+              await dispatch(
+                updatePost({
+                  postId,
+                  text: values.text,
+                  imageUri,
+                }),
+              ).unwrap();
+              navigation.goBack();
+            } catch (e) {
+              Alert.alert(
+                'Error',
+                e instanceof Error ? e.message : 'Failed to update post',
+              );
+            } finally {
+              setSubmitting(false);
+            }
+          }}
         >
-          {({
-            handleChange,
-            handleSubmit,
-            values,
-            errors,
-            touched,
-          }) => (
+          {({ handleChange, handleSubmit, values, errors, touched }) => (
             <>
-              <Text style={styles.label}>What’s on your mind?</Text>
-
+              <Text style={styles.label}>Edit your post</Text>
               <TextInput
                 style={styles.input}
                 multiline
@@ -100,7 +90,6 @@ export default function CreatePostScreen({ navigation }: Props) {
                 value={values.text}
                 onChangeText={handleChange('text')}
               />
-
               {touched.text && errors.text ? (
                 <Text style={styles.error}>{errors.text}</Text>
               ) : null}
@@ -110,14 +99,12 @@ export default function CreatePostScreen({ navigation }: Props) {
               ) : null}
 
               <Pressable style={styles.attach} onPress={pickImage}>
-                <Text style={styles.attachText}>
-                  📷 Add image (optional)
-                </Text>
+                <Text style={styles.attachText}>📷 Change image</Text>
               </Pressable>
 
               <PrimaryButton
-                title={submitting ? 'Posting...' : 'Post'}
-                onPress={handleSubmit} // ✅ correct usage
+                title="Save changes"
+                onPress={() => handleSubmit()}
                 loading={submitting}
               />
             </>
@@ -129,13 +116,8 @@ export default function CreatePostScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    padding: spacing.lg,
-  },
+  flex: { flex: 1, backgroundColor: colors.background },
+  container: { padding: spacing.lg },
   label: {
     fontSize: fontSize.md,
     color: colors.text,
@@ -152,21 +134,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     textAlignVertical: 'top',
   },
-  error: {
-    color: colors.error,
-    marginTop: spacing.xs,
-  },
+  error: { color: colors.error, marginTop: spacing.xs },
   preview: {
     width: '100%',
     height: wp(45),
     borderRadius: 8,
     marginTop: spacing.md,
   },
-  attach: {
-    marginTop: spacing.md,
-  },
-  attachText: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
+  attach: { marginTop: spacing.md },
+  attachText: { color: colors.primary, fontWeight: '600' },
 });
