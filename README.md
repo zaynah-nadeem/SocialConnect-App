@@ -1,71 +1,234 @@
-# SocialConnect
+# SocialConnect 📱
 
-A React Native social app implementing the 3-week curriculum: authentication, navigation, profiles, posts, likes/comments, Redux state, notifications, real-time sync, and animations.
+A full-featured React Native social media app implementing authentication, posts, real-time chat, notifications, profiles, follow system, and Firebase integration. Built using Redux Toolkit and modern mobile architecture.
 
-## Quick start
+---
+
+## 🚀 Quick Start
 
 ```bash
 npm install
 npm start
-# In another terminal:
+````
+
+Run on Android:
+
+```bash
 npm run android
-# or
+```
+
+Run on iOS:
+
+```bash
 npm run ios
 ```
 
-**Demo login:** `demo@socialconnect.app` / `demo123`
+---
 
-## Features by week
+## 🔑 Demo Login
 
-### Week 1
-- React Native project with ESLint & Prettier
-- **Auth:** Login, Sign Up, Forgot Password (Formik + Yup)
-- **Backend:** Mock API (AsyncStorage) by default; Firebase Auth optional
-- **Navigation:** Stack (auth + modals) + Bottom tabs (Home, Profile, Settings)
-- **Profile:** Edit name, bio, avatar (`react-native-image-picker`)
+```
+Email: demo@socialconnect.app
+Password: demo123
+```
 
-### Week 2
-- **Feed:** Create text/image posts, FlatList, timestamps
-- **Likes & comments:** Animated like button, comments screen
-- **Profiles:** View other users from feed author tap
-- **State:** Redux Toolkit (auth, posts, notifications)
+---
 
-### Week 3
-- **Notifications:** In-app notification center (likes/comments on your posts)
-- **Real-time:** Firestore listeners when Firebase enabled; 3s polling in mock mode
-- **UI:** `react-native-reanimated` like animation, `react-native-responsive-dimensions`
-- **Polish:** Memoized post cards, session persistence, error alerts
+## ✨ Features
 
-## Firebase setup (optional)
+### 🔐 Authentication
 
-1. Create a Firebase project and enable **Authentication** (Email/Password) and **Firestore**.
-2. Copy config into `src/config/firebase.ts` and set `USE_FIREBASE = true`.
-3. Create Firestore collections: `users`, `posts` (documents match types in `src/types`).
+* Login / Signup / Logout
+* Forgot Password flow
+* Form validation using Formik + Yup
+* Persistent session handling
 
-For push notifications (FCM), add native FCM setup and extend `src/services/notificationService.ts`.
+---
 
-## Project structure
+### 📝 Posts System
+
+* Create text & image posts
+* Upload images (Firebase Storage support)
+* Like / Unlike posts
+* Comment system
+* Real-time feed updates
+* Duplicate post issue fixed
+
+---
+
+### 💬 Chat System (Real-time Messaging)
+
+* One-to-one private messaging
+* Conversation-based chat structure
+* Real-time Firestore updates
+* Auto conversation creation
+* Last message preview in chat list
+* Message notifications support
+
+---
+
+### 🔔 Notifications
+
+* Like notifications
+* Comment notifications
+* Message notifications
+* Real-time notification updates
+* Stored in Firebase Firestore
+
+---
+
+### 👤 User Profiles
+
+* View user profiles
+* Edit profile (name, bio, avatar)
+* View user posts
+* Follow / Unfollow system
+* Followers / Following lists
+
+---
+
+### 👥 Social Features
+
+* Follow / Unfollow users
+* Social feed interaction system
+* Profile-based user discovery
+
+---
+
+### 📸 Media Support
+
+* Image upload for posts and profile
+* react-native-image-picker integration
+* Firebase Storage support
+
+---
+
+## 🧠 State Management
+
+* Redux Toolkit for global state
+* Async Thunks for API calls
+* Separate slices for:
+
+  * Auth
+  * Posts
+  * Messages
+  * Notifications
+
+---
+
+## 🔥 Backend (Firebase)
+
+* Firebase Authentication
+* Cloud Firestore database
+* Firebase Storage for media
+* Real-time listeners using onSnapshot
+* Mock fallback system (AsyncStorage)
+
+---
+
+## 📁 Project Structure
 
 ```
 src/
-  components/     # PostCard, LikeButton, AuthTextField, ...
-  config/         # Firebase config
+  components/     # UI components (PostCard, Buttons, Inputs)
+  config/         # Firebase configuration
   hooks/          # Typed Redux hooks
-  navigation/     # Auth stack, main tabs, root navigator
-  screens/        # Auth, main tabs, modals
-  services/       # Auth, posts, mock storage, notifications
+  navigation/     # Auth + Main navigation
+  screens/        # All app screens (Auth, Home, Chat, Profile)
+  services/       # API + Firebase logic (posts, messages, notifications)
   store/          # Redux slices
-  theme/          # Colors
+  theme/          # Colors & styling system
   types/          # TypeScript models
-  utils/          # Validation schemas, responsive helpers
+  utils/          # Helpers (validation, responsive)
 ```
 
-## Scripts
+---
 
-| Command        | Description              |
-|----------------|--------------------------|
-| `npm start`    | Metro bundler            |
-| `npm run android` | Run on Android      |
-| `npm run ios`  | Run on iOS (macOS)       |
-| `npm run lint` | ESLint                   |
-| `npm test`     | Jest                     |
+## ⚙️ Installation & Setup
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/your-username/socialconnect.git
+cd socialconnect
+```
+
+---
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+---
+
+### 3. Firebase Setup (Optional)
+
+* Create Firebase project
+* Enable:
+
+  * Authentication (Email/Password)
+  * Firestore Database
+  * Storage
+
+Then add config in:
+
+```
+src/config/firebase.ts
+```
+
+Set:
+
+```
+USE_FIREBASE = true
+```
+
+---
+
+### 4. Run the App
+
+```bash
+npm start
+npm run android
+```
+
+---
+
+## 📡 Requirements
+
+* Node.js >= 16
+* React Native CLI
+* Android Studio / Xcode
+* Firebase project (optional)
+
+---
+
+## 🧩 Tech Stack
+
+* React Native
+* Redux Toolkit
+* Firebase (Auth, Firestore, Storage)
+* TypeScript
+* React Navigation
+* Formik + Yup
+* React Native Reanimated
+
+---
+
+## 📌 Future Improvements
+
+* Group chats
+* Story feature (Instagram-style)
+* Push notifications (FCM)
+* Post sharing system
+* Dark mode improvements
+* Advanced search system
+
+---
+
+## 👨‍💻 Author
+
+Built by **Zaynah Nadeem**
+
+
